@@ -1,0 +1,104 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os
+import sys
+import os.path as path
+
+
+def markdown_to_term_set_bold(s):
+    """
+    >>> markdown_to_term_set_bold("hey **you** how **are** you?")
+    TODO
+    """
+    set_in_bold = True
+    while s.find("**") > -1:
+        if set_in_bold:
+            code = "34;1"  # 34 = blue, 31 = red, 36 = cyan
+        else:
+            code = "0"
+        s = s.replace('**', "\033[" + code + "m", 1)
+        set_in_bold = not set_in_bold
+    return s
+
+
+def markdown_to_term_pad_lines(s):
+    """
+    >>> markdown_to_term_pad_lines("Hey")
+    TODO
+    """
+    lines = s.split("\n")
+    s_out = ""
+    for line in lines:
+        if line.startswith('# '):
+            padding = 0
+        elif line.startswith("## "):
+            padding = 1
+        else:
+            padding = 2
+        s_out += " " * padding + line + "\n"
+    return s_out[:-1]
+
+
+def markdown_to_term_add_dot_to_lists(s):
+    """
+    >>> markdown_to_term_add_dot_to_lists("* hey you")
+    TODO
+    """
+    lines = s.split("\n")
+    s_out = ""
+    for line in lines:
+        if line.lstrip().startswith("*"):
+            line = line.replace("*", "•", 1)
+        s_out += line + "\n"
+    return s_out[:-1]
+
+
+def markdown_to_term_titles_in_bold(s):
+    """
+    >>> markdown_to_term_titles_in_bold("# Hey you")
+    TODO
+    """
+    s = "\n" + s  # We will strip at the end
+    while s.find("\n#") > -1:
+        p1 = s.find("\n#")
+        s = s[:p1 + 1] + "\033[31;1m" + s[p1 + 1:]
+        p2 = s.find("\n", p1 + 1)
+        s = s[:p2] + "\033[0m" + s[p2:]
+    return s[1:]
+
+
+def markdown_to_term(s):
+    s = markdown_to_term_pad_lines(s)
+    s = markdown_to_term_titles_in_bold(s)
+    s = markdown_to_term_set_bold(s)
+    s = markdown_to_term_add_dot_to_lists(s)
+    return s
+
+
+SHORTCUTS_PATH = path.join(path.dirname(path.realpath(__file__)), "..", '..', "shortcuts")
+
+
+def list_keys():
+    l = []
+    for root, dirs, files in os.walk(SHORTCUTS_PATH):
+        for filename in files:
+            l.append(filename[:filename.rfind(".")])
+    return l
+
+
+if __name__ == '__main__':
+    help = """\033[1mshortcuts some-key\033[0m
+    some-key can be:
+    """ + "\n".join(["  * " + k for k in list_keys()])
+
+    if len(sys.argv) != 2 or sys.argv[1] in ["-h", "--help", "help"]:
+        print(help)
+        sys.exit(1)
+    if sys.argv[1] in ["-l", "--list"]:
+        print(" ".join(list_keys()))
+        sys.exit(0)
+
+    key = sys.argv[-1]
+
+    with open(path.join(SHORTCUTS_PATH, key + ".md"), 'r') as fin:
+        print(markdown_to_term(fin.read()))
