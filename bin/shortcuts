@@ -75,7 +75,7 @@ def markdown_to_term(s):
     return s
 
 
-SHORTCUTS_PATH = path.join(path.dirname(path.realpath(__file__)), "..", '..', "shortcuts")
+SHORTCUTS_PATH = path.join(path.dirname(path.realpath(__file__)), "..", "shortcuts")
 
 
 def list_keys():
