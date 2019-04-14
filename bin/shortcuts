@@ -13,11 +13,27 @@ def markdown_to_term_set_bold(s):
     set_in_bold = True
     while s.find("**") > -1:
         if set_in_bold:
-            code = "34;1"  # 34 = blue, 31 = red, 36 = cyan
+            code = "0;1"  # 34 = blue, 31 = red, 36 = cyan
         else:
             code = "0"
         s = s.replace('**', "\033[" + code + "m", 1)
         set_in_bold = not set_in_bold
+    return s
+
+
+def markdown_to_term_set_italic(s):
+    """
+    >>> markdown_to_term_set_bold("hey **you** how **are** you?")
+    TODO
+    """
+    set_in_italic = True
+    while s.find("*") > -1:
+        if set_in_italic:
+            code = "31;1"  # 34 = blue, 31 = red, 36 = cyan
+        else:
+            code = "0"
+        s = s.replace('*', "\033[" + code + "m", 1)
+        set_in_italic = not set_in_italic
     return s
 
 
@@ -58,13 +74,23 @@ def markdown_to_term_titles_in_bold(s):
     >>> markdown_to_term_titles_in_bold("# Hey you")
     TODO
     """
-    s = "\n" + s  # We will strip at the end
-    while s.find("\n#") > -1:
-        p1 = s.find("\n#")
-        s = s[:p1 + 1] + "\033[31;1m" + s[p1 + 1:]
-        p2 = s.find("\n", p1 + 1)
-        s = s[:p2] + "\033[0m" + s[p2:]
-    return s[1:]
+    lines = s.split("\n")
+    s_out = ""
+    for line in lines:
+        if line.lstrip().startswith("#"):
+            line = "\033[1m" + line+"\033[0m"
+        s_out += line + "\n"
+    return s_out[:-1]
+
+
+def markdown_to_term_set_default_color(s):
+    """
+    >>> markdown_to_term_set_default_color("...")
+    TODO
+    """
+    s = "\033[38;5;246m" + s
+    s = ("\033[0m" + "\033[38;5;248m").join(s.split("\033[0m"))
+    return s
 
 
 def markdown_to_term(s):
@@ -72,6 +98,8 @@ def markdown_to_term(s):
     s = markdown_to_term_titles_in_bold(s)
     s = markdown_to_term_set_bold(s)
     s = markdown_to_term_add_dot_to_lists(s)
+    s = markdown_to_term_set_italic(s)
+    s = markdown_to_term_set_default_color(s)
     return s
 
 

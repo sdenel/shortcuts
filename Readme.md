@@ -6,7 +6,6 @@
 git clone ...
 cd shortcuts
 # Then edit your ~/.bashrc or ~/.zshrc file and append the following lines:
-SHORTCUT_TOOL_PATH="PATH_TO_CLONED_DIRECTORY/shortcuts/bin"
-export PATH="$SHORTCUT_TOOL_PATH/in_path:$PATH"
+export PATH="PATH_TO_CLONED_DIRECTORY/shortcuts/bin/:$PATH"
 complete -W "`shortcuts --list`" shortcuts
 ```
